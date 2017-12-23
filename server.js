@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 8080;
 const db = require('./db');
 const request = require('request');
+const stripe = require("stripe")(process.env.STRIPESECRETKEY);
 
 app.use(express.static("public"));
 
@@ -17,6 +18,36 @@ app.use(function(req, res, next){
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 
+
+app.post('/api/charge', (req, res) => {
+  stripe.customers.create({
+    email: req.body.email
+  })
+  .then(customer => {
+    stripe.charges.create({
+      amount: 10,
+      currency: 'usd',
+      customer: customer.id
+    })
+    return customer
+  })
+  .then(customer => {
+    console.log(customer.sources.data, 'customer');
+    let chargeData = customer.sources.data[0];
+    payments.create({
+      customerid: customer.id,
+      email: req.body.email,
+      amount: 500,
+      lastFourDigits: chargeData.last4,
+      cardType: chargeData.brand,
+      origin: chargeData.country
+    })
+    .then( _=> {
+      res.send('success')
+    })
+    return customer
+  })
+});
 
 app.get('/api/users', (req, res) => {
   db.query('SELECT * FROM Users', (err, result) => {
@@ -37,7 +68,7 @@ app.get('/api/coinmarket', (req, res) => {
 });
 
 app.get('/api/historical-exchange', (req, res) => {
-  request(`https://min-api.cryptocompare.com/data/pricehistorical?fsym=BTC&tsyms=USD&ts=1513749600`, function (error, response, body) {
+  request(`https://min-api.cryptocompare.com/data/pricehistorical?fsym=${req.body.symbol}&tsyms=USD&ts=${req.body.purchased_at}`, function (error, response, body) {
     res.json(JSON.parse(body));
   });
 });
