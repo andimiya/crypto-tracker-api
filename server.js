@@ -29,12 +29,6 @@ app.get('/api/currencies', (req, res) => {
   });
 });
 
-app.get('/api/currencies', (req, res) => {
-  db.query('SELECT * FROM crypto_types', (err, result) => {
-    res.json({ data: result.rows });
-  });
-});
-
 app.get('/api/historical-exchange', (req, res) => {
   request(`https://min-api.cryptocompare.com/data/pricehistorical?fsym=${req.query.symbol}&tsyms=USD&ts=${req.query.purchased_at}`, (error, response, body) => {
     res.json(JSON.parse(body));
@@ -122,7 +116,7 @@ app.post('/api/transactions', (req, res) => {
 app.delete('/api/transactions', (req, res) => {
   const deleteQuery = 'DELETE FROM Transactions WHERE id = $1'
   const { id } = req.query;
-  const values = [ id ];  
+  const values = [ id ];
   if (!user_id) {
     return res.status(400).json({ error: 'User ID required as query param' });
   }
