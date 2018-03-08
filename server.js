@@ -25,7 +25,7 @@ app.get('/api/users', (req, res) => {
 
 app.get('/api/currencies', (req, res) => {
   db.query('SELECT * FROM crypto_types', (err, result) => {
-    res.json({ data: result.rows });
+    res.json({ data: result });
   });
 });
 
@@ -113,14 +113,15 @@ app.post('/api/transactions', (req, res) => {
   });
 });
 
-app.delete('/api/transactions', (req, res) => {
-  const deleteQuery = 'DELETE FROM Transactions WHERE id = $1'
-  const { id } = req.query;
-  const values = [ id ];
+app.delete('/api/transactions/:deleteId', (req, res) => {
+  const deleteQuery = 'DELETE FROM Transactions WHERE user_id = $1'
+  const { user_id } = req.query;
+  const { delete_id } = req.param;
+  const values = [user_id, delete_id];
   if (!user_id) {
     return res.status(400).json({ error: 'User ID required as query param' });
   }
-  db.query(deleteQuery, values, (err, result) => {
+  db.query(deleteQuery, delete_id, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
