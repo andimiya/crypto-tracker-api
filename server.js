@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 8080;
 const db = require('./db');
+let request = require('request');
 
 app.use(express.static("public"));
 
@@ -26,6 +27,12 @@ app.get('/api/users', (req, res) => {
 app.get('/api/currencies', (req, res) => {
   db.query('SELECT * FROM crypto_types', (err, result) => {
     res.json({ data: result });
+  });
+});
+
+app.get('/api/coinmarket', (req, res) => {
+  request(`https://api.coinmarketcap.com/v1/ticker/`, (error, response, body) => {
+    res.json(JSON.parse(body));
   });
 });
 
