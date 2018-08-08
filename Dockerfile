@@ -1,4 +1,4 @@
-FROM node:7.10
+FROM node:8.10
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -19,4 +19,4 @@ COPY . .
 RUN apt-get update && apt-get install -y vim
 
 EXPOSE 8080
-CMD [ "nodemon", "start" ]
+CMD [ "npm", "start" ]
