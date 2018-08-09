@@ -18,7 +18,7 @@ app.use(function (req, res, next) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/api/get-binance', (req, res) => {
+app.get('/api/binance', (req, res) => {
   db.query('SELECT * FROM binance_kline', (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -29,7 +29,7 @@ app.get('/api/get-binance', (req, res) => {
 })
 
 app.get('/api/binance-kline', (req, res) => {
-  rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d&limit=100`)
+  rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d&limit=30`)
     .then((body) => {
 
       let dataArray = JSON.parse(body);
@@ -61,7 +61,6 @@ app.get('/api/binance-kline', (req, res) => {
           return res.send({ data: result.rows });
         })
       })
-
     })
     .catch((err) => {
       return res.status(500).json({ error: err.message });
