@@ -18,5 +18,5 @@ COPY . .
 
 RUN apt-get update && apt-get install -y vim
 
-EXPOSE 8080
+EXPOSE 8080:8080
 CMD [ "npm", "start" ]

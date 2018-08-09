@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 8080;
 const db = require('./db');
 const request = require('request');
+const rp = require('request-promise');
 
 app.use(express.static("public"));
 
@@ -16,6 +17,26 @@ app.use(function (req, res, next) {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.get('/api/binance-kline', (req, res) => {
+  rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d`)
+    .then((body) => {
+      let dataArray = JSON.parse(body);
+
+      const insertQuery = 'INSERT INTO binance_kline (open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore ) VALUES ($1)';
+
+      const values = dataArray;
+      db.query(insertQuery, values, (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        return res.json({ data: result.rows });
+      })
+    })
+    .catch((err) => {
+      console.log(err, 'err')
+    })
+})
 
 app.get('/api/currencies', (req, res) => {
   db.query('SELECT * FROM crypto_types', (err, result) => {

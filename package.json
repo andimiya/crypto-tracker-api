@@ -23,7 +23,9 @@
     "nodemon": "1.17.2",
     "pg": "7.3.0",
     "pg-hstore": "2.3.2",
+    "pg-promise": "8.4.5",
     "request": "2.83.0",
-    "sequelize": "4.15.0"
-  }
+    "request-promise": "4.2.2"
+  },
+  "false": {}
 }
