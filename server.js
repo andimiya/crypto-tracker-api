@@ -29,25 +29,39 @@ app.get('/api/get-binance', (req, res) => {
 })
 
 app.get('/api/binance-kline', (req, res) => {
-  rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d`)
+  rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d&limit=100`)
     .then((body) => {
 
       let dataArray = JSON.parse(body);
 
-      for (let i = 0; i < dataArray.length; i++) {
+      dataArray.map((dataAssignment) => {
 
-        const insertQuery = 'INSERT INTO binance_kline (open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)';
+        const insertQuery = 'INSERT INTO binance_kline (currency, open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)';
 
-        let values = dataArray[i];
-        console.log(i, 'i')
+        const currency = req.query.symbol;
+        const open_time = dataAssignment[0];
+        const open = dataAssignment[1];
+        const high = dataAssignment[2];
+        const low = dataAssignment[3];
+        const close = dataAssignment[4];
+        const volume = dataAssignment[5];
+        const close_time = dataAssignment[6];
+        const quote_asset_volume = dataAssignment[7];
+        const number_of_trades = dataAssignment[8];
+        const taker_buy_base_asset_volume = dataAssignment[9];
+        const taker_buy_quote_asset_volume = dataAssignment[10];
+        const ignore = dataAssignment[11];
+
+        let values = [currency, open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore];
 
         db.query(insertQuery, values, (err, result) => {
           if (err) {
-            return res.status(500).json({ error: err.message });
+            return res.status(500).send({ error: err.message });
           }
-          return res.json({ data: result.rows });
+          return res.send({ data: result.rows });
         })
-      }
+      })
+
     })
     .catch((err) => {
       return res.status(500).json({ error: err.message });

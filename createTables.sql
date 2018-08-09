@@ -27,6 +27,7 @@ CREATE TABLE Transactions (
 
 CREATE TABLE binance_kline (
   id serial primary key,
+  currency text,
   open_time bigint UNIQUE,
   open float,
   high float,
