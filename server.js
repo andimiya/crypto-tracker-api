@@ -18,35 +18,39 @@ app.use(function (req, res, next) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.get('/api/get-binance', (req, res) => {
+  db.query('SELECT * FROM binance_kline', (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    } else {
+      res.json({ data: result.rows });
+    }
+  });
+})
+
 app.get('/api/binance-kline', (req, res) => {
   rp(`https://api.binance.com/api/v1/klines?symbol=${req.query.symbol}&interval=1d`)
     .then((body) => {
 
-      let dataArray = body.replace(/['"]+/g, '');
+      let dataArray = JSON.parse(body);
 
-      dataArray = dataArray.split(',');
+      for (let i = 0; i < dataArray.length; i++) {
 
-      // for (let i = 0; i < dataArray.length; i++) {
+        const insertQuery = 'INSERT INTO binance_kline (open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)';
 
-      // dataArray.map((body) => {
-      //   return console.log(typeof body, 'body')
-      // })
+        let values = dataArray[i];
+        console.log(i, 'i')
 
-      const insertQuery = 'INSERT INTO binance_kline (open_time, open, high, low, close, volume, close_time, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume, ignore ) VALUES ($1)';
-
-      const values = dataArray[0];
-      console.log(dataArray[0], 'data array');
-
-      db.query(insertQuery, [values], (err, result) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        return res.json({ data: result.rows });
-      })
-      // }
+        db.query(insertQuery, values, (err, result) => {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+          return res.json({ data: result.rows });
+        })
+      }
     })
     .catch((err) => {
-      console.log(err, 'err')
+      return res.status(500).json({ error: err.message });
     })
 })
 

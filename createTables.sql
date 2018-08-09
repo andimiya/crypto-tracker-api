@@ -27,7 +27,7 @@ CREATE TABLE Transactions (
 
 CREATE TABLE binance_kline (
   id serial primary key,
-  open_time bigint,
+  open_time bigint UNIQUE,
   open float,
   high float,
   low float,
@@ -40,24 +40,5 @@ CREATE TABLE binance_kline (
   taker_buy_quote_asset_volume float,
   ignore float
 );
-
--- CREATE TABLE binance_kline (
---   id serial primary key,
---   crypto_type_id integer references Crypto_Types(id),
---   date timestamp,
---   high float8,
---   low float8,
---   close float8,
---   mid float8,
---   pred_sell float8,
---   pred_buy float8,
---   high_close_percent decimal(5,4),
---   sell_percent integer,
---   buy_percent integer,
---   decision integer,
---   daily_high_low decimal(5,4),
---   close_spread decimal(5,4),
---   high_close float8
--- );
 
 COMMIT;
